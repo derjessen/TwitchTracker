@@ -6,6 +6,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,33 +19,26 @@ public class Controllers {
 
     @Autowired
     private GamesRepository repository;
-    private List<Integer> viewerList = new ArrayList<Integer>();
-    private List<Date> dateList = new ArrayList<Date>();
 
-    @RequestMapping("/index")
-    String index(@RequestParam String name, Model model) {
+    @RequestMapping("/")
+    String index(Model model) {
 
-
-        for (Twitchbackup tb : repository.findGameByName("League of Legends")) {
+    Twitchbackup tb = repository.findGameByName("League of Legends");
             System.out.println(tb.getId());
             System.out.println(tb.getName());
             System.out.println(tb.getGame_id());
             System.out.println("Insgesamt: "+ tb.getStats().size() + " gespeicherte Stats");
 
+            Object[] chartsData = new Object[tb.getStats().size()];
+
             for(int i = 0; i < tb.getStats().size(); i++){
-                //System.out.println(tb.getStats().get(i).getViewers());
-                viewerList.add(tb.getStats().get(i).getViewers());
-                dateList.add(tb.getStats().get(i).getTimestamp());
-//				System.out.println(tb.getStats().get(i).getTimestamp());
+                int viewers = tb.getStats().get(i).getViewers();
+                Date timestamp = tb.getStats().get(i).getTimestamp();
+                LocalDateTime localDateTime = timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                chartsData[i] = new Object[] {localDateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), viewers};
             }
-        }
-        System.out.println(viewerList);
-        System.out.println(dateList);
 
-        model.addAttribute("name", name);
-        model.addAttribute("viewer", viewerList);
-        model.addAttribute("date", dateList);
-
+        model.addAttribute("chartData", chartsData);
         return "index";
     }
 }
