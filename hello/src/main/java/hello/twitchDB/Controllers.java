@@ -1,5 +1,12 @@
 package hello.twitchDB;
 
+import com.mb3364.twitch.api.Twitch;
+import com.mb3364.twitch.api.handlers.ChannelResponseHandler;
+import com.mb3364.twitch.api.handlers.TopGamesResponseHandler;
+import com.mb3364.twitch.api.handlers.UserResponseHandler;
+import com.mb3364.twitch.api.models.Channel;
+import com.mb3364.twitch.api.models.TopGame;
+import com.mb3364.twitch.api.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 
 @Controller
 public class Controllers {
@@ -33,13 +41,72 @@ public class Controllers {
                 LocalDateTime localDateTime = timestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
                 chartsData[i] = new Object[] {localDateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")), viewers};
             }
-
         model.addAttribute("chartData", chartsData);
         return "index";
     }
 
     @RequestMapping("/twitch")
     public String twitch() {
+
+        Twitch twitch = new Twitch();
+        twitch.setClientId("pf07c0exdacmspfs21hro97tfpq0u6y"); // This is your registered application's client ID
+
+        twitch.channels().get("TV_raGe", new ChannelResponseHandler() {
+            @Override
+            public void onSuccess(Channel channel) {
+                /* Successful response from the Twitch API */
+                System.out.println(channel.getGame());
+            }
+
+            @Override
+            public void onFailure(int statusCode, String statusMessage, String errorMessage) {
+                /* Twitch API responded with an error message */
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                /* Unable to access Twitch, or error parsing the response */
+            }
+        });
+
+        twitch.users().get("TV_raGe", new UserResponseHandler() {
+            @Override
+            public void onSuccess(User user) {
+
+                System.out.println(user.getName());
+            }
+
+            @Override
+            public void onFailure(int i, String s, String s1) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
+            }
+        });
+
+        twitch.games().getTop(new TopGamesResponseHandler() {
+            @Override
+            public void onSuccess(int i, List<TopGame> list) {
+                System.out.println(list.size());
+                for(TopGame game : list) {
+                    System.out.println(game.getGame().getName() + " hat " + game.getViewers() + " Zuschauer");
+                }
+            }
+
+            @Override
+            public void onFailure(int i, String s, String s1) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
+            }
+        });
+
         return "twitch";
     }
 }
