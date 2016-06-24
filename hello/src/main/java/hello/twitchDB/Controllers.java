@@ -1,5 +1,6 @@
 package hello.twitchDB;
 
+import com.mb3364.http.RequestParams;
 import com.mb3364.twitch.api.Twitch;
 import com.mb3364.twitch.api.handlers.ChannelResponseHandler;
 import com.mb3364.twitch.api.handlers.TopGamesResponseHandler;
@@ -86,8 +87,9 @@ public class Controllers {
 
             }
         });
-
-        twitch.games().getTop(new TopGamesResponseHandler() {
+        RequestParams params = new RequestParams();
+        params.put("limit", 100);
+        twitch.games().getTop(params ,new TopGamesResponseHandler() {
             @Override
             public void onSuccess(int i, List<TopGame> list) {
                 System.out.println(list.size());
