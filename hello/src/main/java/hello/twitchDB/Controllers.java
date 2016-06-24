@@ -88,7 +88,8 @@ public class Controllers {
             }
         });
         RequestParams params = new RequestParams();
-        params.put("limit", 100);
+        params.put("limit", 50);
+
         twitch.games().getTop(params ,new TopGamesResponseHandler() {
             @Override
             public void onSuccess(int i, List<TopGame> list) {
